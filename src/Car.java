@@ -7,6 +7,11 @@ public class Car {
     public Car () {
     }
 
+    private Car(Builder builder) {
+        this.color = builder.color;
+        this.type = builder.type;
+    }
+
     public Car(String color, String type) {
         this.color = color;
         this.type = type;
@@ -50,5 +55,24 @@ public class Car {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    static class Builder {
+        private String color;
+        private String type;
+
+        public Builder color(String color) {
+            this.color = color;
+            return this;
+        }
+
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Car build() {
+            return new Car(this);
+        }
     }
 }

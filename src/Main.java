@@ -1,34 +1,33 @@
-import com.fasterxml.jackson.core.JsonProcessingException;
-import singleton.ObjectMapperSingleton;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        Car car = new Car("Black","VolksWagen");
-        String res = convertObjectToJSON(car);
-        System.out.println(res);
-        Car car1 = convertJSONToCarObject(res);
-        System.out.println(car.hashCode() + " " + car1.hashCode());
-    }
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonWithAdditionalField = "{\"color\":\"White\",\"type\":\"Type\",\"year\":\"1999\"}";
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private static Car convertJSONToCarObject(String json) {
-        Car car = null;
+        JsonNode jsonNodeRoot = null;
         try {
-            car = ObjectMapperSingleton.getObjectMapper().readValue(json, Car.class);
+            jsonNodeRoot = objectMapper.readTree(jsonWithAdditionalField);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return car;
-    }
+        JsonNode jsonNodeYear = jsonNodeRoot.get("year");
+        String year = jsonNodeYear.asText();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
 
-    private static String convertObjectToJSON(Object obj) {
-        String jsonFromObject = null;
+
+        Car car = new Car.Builder().color("blue").type("Cool").build();
+        Car car1 = null;
         try {
-            jsonFromObject = ObjectMapperSingleton.getObjectMapper().writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
+            car1 = objectMapper.readValue(jsonWithAdditionalField,Car.class);
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return jsonFromObject;
+        System.out.println(car1);
     }
 }
